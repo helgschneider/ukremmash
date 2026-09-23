@@ -42,9 +42,9 @@ type StatusFilter = "all" | RequestStatus;
 
 export function StatusBadge({ status }: { status: RequestStatus }) {
   return status === "Выполнено" ? (
-    <Badge className="bg-success text-success-foreground hover:bg-success">Выполнено</Badge>
+    <Badge className="whitespace-nowrap bg-success text-success-foreground hover:bg-success">Выполнено</Badge>
   ) : (
-    <Badge className="bg-warning text-warning-foreground hover:bg-warning">В обработке</Badge>
+    <Badge className="whitespace-nowrap bg-warning text-warning-foreground hover:bg-warning">В обработке</Badge>
   );
 }
 
