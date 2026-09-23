@@ -5,14 +5,11 @@ export type RequestStatus = "В обработке" | "Выполнено";
 export const STATUSES: RequestStatus[] = ["В обработке", "Выполнено"];
 
 export const STREETS = [
-  "Центральная",
-  "Садовая",
-  "Лесная",
+  "Институтская",
+  "Юбилейная",
   "Школьная",
-  "Молодёжная",
-  "Заречная",
-  "Полевая",
-  "Новая",
+  "Мира",
+  "Спортивная",
 ];
 
 export interface RepairRequest {
