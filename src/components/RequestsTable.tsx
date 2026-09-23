@@ -57,7 +57,8 @@ export function RequestsTable({ requests, role, onEdit, onDelete }: Props) {
   const [exporting, setExporting] = useState<"xlsx" | "pdf" | null>(null);
 
   const isAdmin = role === "admin";
-  const canManage = (r: RepairRequest) => isAdmin || r.createdBy === "user";
+  const canManage = (r: RepairRequest) =>
+    role === "supervisor" ? false : isAdmin || (role === "user" && r.createdBy === "user");
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();

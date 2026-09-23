@@ -1,4 +1,6 @@
-export type Role = "user" | "admin";
+export type Role = "user" | "admin" | "supervisor";
+
+export const STORAGE_KEY_REQUESTS = "electro-requests:v1";
 
 export type RequestStatus = "В обработке" | "Выполнено";
 
@@ -35,10 +37,12 @@ const ROLE_KEY = "electro-requests:role";
 // Пароли из технического задания. Административный пароль в ТЗ содержит
 // кириллическую «о» — принимаем обе версии написания.
 const USER_PASSWORD = "user123";
+const SUPERVISOR_PASSWORD = "superduper123";
 const ADMIN_PASSWORDS = ["adоmin$123", "adomin$123", "admin$123"];
 
 export function resolveRole(password: string): Role | null {
   if (password === USER_PASSWORD) return "user";
+  if (password === SUPERVISOR_PASSWORD) return "supervisor";
   if (ADMIN_PASSWORDS.includes(password)) return "admin";
   return null;
 }
@@ -46,7 +50,7 @@ export function resolveRole(password: string): Role | null {
 export function loadRole(): Role | null {
   if (typeof window === "undefined") return null;
   const r = window.localStorage.getItem(ROLE_KEY);
-  return r === "user" || r === "admin" ? r : null;
+  return r === "user" || r === "admin" || r === "supervisor" ? r : null;
 }
 
 export function saveRole(role: Role | null) {
