@@ -3,13 +3,16 @@ import { Send, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { RequestFields, emptyFields, validateFields, type RequestFieldValues } from "@/components/RequestFields";
+import { RequestFields, defaultsFromDicts, validateFields, type RequestFieldValues } from "@/components/RequestFields";
+import type { Dictionaries } from "@/lib/dictionaries";
 
 interface Props {
   onSubmit: (data: RequestFieldValues) => void;
+  dicts: Dictionaries;
 }
 
-export function NewRequestForm({ onSubmit }: Props) {
+export function NewRequestForm({ onSubmit, dicts }: Props) {
+  const emptyFields = defaultsFromDicts(dicts);
   const [values, setValues] = useState<RequestFieldValues>(emptyFields);
   const [errors, setErrors] = useState<Partial<Record<keyof RequestFieldValues, string>>>({});
 
@@ -49,6 +52,7 @@ export function NewRequestForm({ onSubmit }: Props) {
               });
             }}
             idPrefix="new"
+            dicts={dicts}
           />
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button

@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { RequestFields, validateFields, type RequestFieldValues } from "@/components/RequestFields";
+import type { Dictionaries } from "@/lib/dictionaries";
 import {
   STATUSES,
   formatDateTime,
@@ -29,11 +30,12 @@ import {
 interface Props {
   request: RepairRequest | null;
   role: Role;
+  dicts: Dictionaries;
   onClose: () => void;
   onSave: (updated: RepairRequest) => void;
 }
 
-export function EditRequestDialog({ request, role, onClose, onSave }: Props) {
+export function EditRequestDialog({ request, role, dicts, onClose, onSave }: Props) {
   const [values, setValues] = useState<RequestFieldValues | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof RequestFieldValues, string>>>({});
   const [status, setStatus] = useState<RequestStatus>("В обработке");
@@ -106,6 +108,7 @@ export function EditRequestDialog({ request, role, onClose, onSave }: Props) {
                 });
               }}
               idPrefix="edit"
+              dicts={dicts}
             />
 
             {role === "admin" && (
