@@ -58,7 +58,7 @@ interface Props {
   idPrefix?: string;
 }
 
-function FieldError({ msg }: { msg?: string }) {
+function FieldError({ msg }: { msg?: string | undefined }) {
   return msg ? <p className="text-xs text-destructive">{msg}</p> : null;
 }
 
