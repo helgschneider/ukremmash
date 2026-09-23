@@ -2,14 +2,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { STREETS } from "@/lib/requests";
+import { defaultDictionaries, type Dictionaries } from "@/lib/dictionaries";
 import { z } from "zod";
+import type React from "react";
 
 export const requestFieldsSchema = z.object({
   street: z.string().trim().min(1, "Укажите улицу").max(100),
-  house: z.string().trim().min(1, "Укажите номер дома").max(10),
-  entrance: z.string().trim().max(5).regex(/^\d*$/, "Только цифры"),
-  floor: z.string().trim().max(5).regex(/^-?\d*$/, "Только цифры"),
+  house: z.string().trim().min(1, "Укажите номер дома").max(100),
+  entrance: z.string().trim().max(100),
+  floor: z.string().trim().max(100),
   apartment: z.string().trim().max(10),
   applicant: z.string().trim().min(2, "Укажите фамилию и имя").max(120),
   phone: z
@@ -56,86 +57,117 @@ interface Props {
   errors: Errors;
   onChange: (patch: Partial<RequestFieldValues>) => void;
   idPrefix?: string;
+  dicts?: Dictionaries;
 }
 
 function FieldError({ msg }: { msg?: string | undefined }) {
   return msg ? <p className="text-xs text-destructive">{msg}</p> : null;
 }
 
-export function RequestFields({ values, errors, onChange, idPrefix = "rq" }: Props) {
+export function defaultsFromDicts(dicts: Dictionaries): RequestFieldValues {
+  return {
+    ...emptyFields,
+    street: dicts.street.defaultValue ?? "",
+    house: dicts.house.defaultValue ?? "",
+    entrance: dicts.entrance.defaultValue ?? "",
+    floor: dicts.floor.defaultValue ?? "",
+  };
+}
+
+function DictField({
+  id,
+  label,
+  options,
+  value,
+  error,
+  onChange,
+  placeholder,
+  inputProps,
+}: {
+  id: string;
+  label: string;
+  options: string[];
+  value: string;
+  error?: string | undefined;
+  onChange: (v: string) => void;
+  placeholder: string;
+  inputProps?: React.ComponentProps<typeof Input>;
+}) {
+  const opts = value && !options.includes(value) ? [value, ...options] : options;
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      {options.length > 0 ? (
+        <Select value={value} onValueChange={onChange}>
+          <SelectTrigger id={id} aria-invalid={!!error}>
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {opts.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : (
+        <Input id={id} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!error} {...inputProps} />
+      )}
+      <FieldError msg={error} />
+    </div>
+  );
+}
+
+export function RequestFields({ values, errors, onChange, idPrefix = "rq", dicts }: Props) {
   const id = (k: string) => `${idPrefix}-${k}`;
-  const isKnownStreet = STREETS.includes(values.street);
+  const d = dicts ?? defaultDictionaries();
 
   return (
     <div className="grid gap-4">
       <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="space-y-2">
-          <Label htmlFor={id("street")}>Улица</Label>
-          <Select
-            value={isKnownStreet ? values.street : values.street ? "__other" : ""}
-            onValueChange={(v) => onChange({ street: v === "__other" ? " " : v })}
-          >
-            <SelectTrigger id={id("street")} aria-invalid={!!errors.street}>
-              <SelectValue placeholder="Выберите улицу" />
-            </SelectTrigger>
-            <SelectContent>
-              {STREETS.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-              <SelectItem value="__other">Другая улица…</SelectItem>
-            </SelectContent>
-          </Select>
-          {!isKnownStreet && values.street !== "" && (
-            <Input
-              placeholder="Введите название улицы"
-              value={values.street.trim()}
-              onChange={(e) => onChange({ street: e.target.value || " " })}
-              autoFocus
-            />
-          )}
-          <FieldError msg={errors.street} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor={id("house")}>Номер дома</Label>
-          <Input
-            id={id("house")}
-            value={values.house}
-            onChange={(e) => onChange({ house: e.target.value })}
-            placeholder="12А"
-            aria-invalid={!!errors.house}
-          />
-          <FieldError msg={errors.house} />
-        </div>
+        <DictField
+          id={id("street")}
+          label="Улица"
+          options={d.street.values}
+          value={values.street}
+          error={errors.street}
+          onChange={(v) => onChange({ street: v })}
+          placeholder="Выберите улицу"
+          inputProps={{ placeholder: "Название улицы" }}
+        />
+        <DictField
+          id={id("house")}
+          label="Номер дома"
+          options={d.house.values}
+          value={values.house}
+          error={errors.house}
+          onChange={(v) => onChange({ house: v })}
+          placeholder="Выберите дом"
+          inputProps={{ placeholder: "12А" }}
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="space-y-2">
-          <Label htmlFor={id("entrance")}>Подъезд</Label>
-          <Input
-            id={id("entrance")}
-            type="number"
-            inputMode="numeric"
-            min={1}
-            value={values.entrance}
-            onChange={(e) => onChange({ entrance: e.target.value })}
-            aria-invalid={!!errors.entrance}
-          />
-          <FieldError msg={errors.entrance} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor={id("floor")}>Этаж</Label>
-          <Input
-            id={id("floor")}
-            type="number"
-            inputMode="numeric"
-            value={values.floor}
-            onChange={(e) => onChange({ floor: e.target.value })}
-            aria-invalid={!!errors.floor}
-          />
-          <FieldError msg={errors.floor} />
-        </div>
+        <DictField
+          id={id("entrance")}
+          label="Подъезд"
+          options={d.entrance.values}
+          value={values.entrance}
+          error={errors.entrance}
+          onChange={(v) => onChange({ entrance: v })}
+          placeholder="—"
+          inputProps={{ type: "number", inputMode: "numeric", min: 1 }}
+        />
+        <DictField
+          id={id("floor")}
+          label="Этаж"
+          options={d.floor.values}
+          value={values.floor}
+          error={errors.floor}
+          onChange={(v) => onChange({ floor: v })}
+          placeholder="—"
+          inputProps={{ type: "number", inputMode: "numeric" }}
+        />
         <div className="space-y-2">
           <Label htmlFor={id("apartment")}>Квартира</Label>
           <Input
