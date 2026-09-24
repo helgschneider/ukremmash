@@ -4,22 +4,33 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { resolveRole, type Role } from "@/lib/requests";
+import { useServerFn } from "@tanstack/react-start";
+import { login } from "@/lib/api.functions";
+import type { Session } from "@/lib/requests";
 
-export function LoginForm({ onLogin }: { onLogin: (role: Role) => void }) {
+export function LoginForm({ onLogin }: { onLogin: (s: Session) => void }) {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const loginFn = useServerFn(login);
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
-    const role = resolveRole(password.trim());
-    if (!role) {
-      setError("Неверный пароль. Попробуйте ещё раз.");
-      return;
+    setBusy(true);
+    try {
+      const res = await loginFn({ data: { password } });
+      if (!res.ok) {
+        setError("Неверный пароль. Попробуйте ещё раз.");
+        return;
+      }
+      setError(null);
+      onLogin({ role: res.role, token: res.token });
+    } catch {
+      setError("Не удалось связаться с сервером. Попробуйте ещё раз.");
+    } finally {
+      setBusy(false);
     }
-    setError(null);
-    onLogin(role);
   };
 
   return (
@@ -59,7 +70,7 @@ export function LoginForm({ onLogin }: { onLogin: (role: Role) => void }) {
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={busy}>
               <LogIn className="h-4 w-4" />
               Войти
             </Button>
