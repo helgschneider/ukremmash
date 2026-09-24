@@ -32,30 +32,27 @@ export interface RepairRequest {
 }
 
 const STORAGE_KEY = "electro-requests:v1";
-const ROLE_KEY = "electro-requests:role";
+const SESSION_KEY = "electro-requests:session";
 
-// Пароли из технического задания. Административный пароль в ТЗ содержит
-// кириллическую «о» — принимаем обе версии написания.
-const USER_PASSWORD = "user123";
-const SUPERVISOR_PASSWORD = "superduper123";
-const ADMIN_PASSWORDS = ["adоmin$123", "adomin$123", "admin$123"];
+export interface Session {
+  role: Role;
+  token: string;
+}
 
-export function resolveRole(password: string): Role | null {
-  if (password === USER_PASSWORD) return "user";
-  if (password === SUPERVISOR_PASSWORD) return "supervisor";
-  if (ADMIN_PASSWORDS.includes(password)) return "admin";
+export function loadSession(): Session | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const s = JSON.parse(window.localStorage.getItem(SESSION_KEY) ?? "null") as Session | null;
+    if (s && (s.role === "user" || s.role === "admin" || s.role === "supervisor") && typeof s.token === "string") return s;
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 
-export function loadRole(): Role | null {
-  if (typeof window === "undefined") return null;
-  const r = window.localStorage.getItem(ROLE_KEY);
-  return r === "user" || r === "admin" || r === "supervisor" ? r : null;
-}
-
-export function saveRole(role: Role | null) {
-  if (role) window.localStorage.setItem(ROLE_KEY, role);
-  else window.localStorage.removeItem(ROLE_KEY);
+export function saveSession(s: Session | null) {
+  if (s) window.localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+  else window.localStorage.removeItem(SESSION_KEY);
 }
 
 export function loadRequests(): RepairRequest[] {
