@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_dictionaries: {
+        Row: {
+          default_value: string | null
+          key: string
+          values: string[]
+        }
+        Insert: {
+          default_value?: string | null
+          key: string
+          values?: string[]
+        }
+        Update: {
+          default_value?: string | null
+          key?: string
+          values?: string[]
+        }
+        Relationships: []
+      }
+      repair_requests: {
+        Row: {
+          apartment: string
+          applicant: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string
+          entrance: string
+          floor: string
+          house: string
+          id: string
+          phone: string
+          result: string
+          status: string
+          street: string
+        }
+        Insert: {
+          apartment?: string
+          applicant?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          entrance?: string
+          floor?: string
+          house?: string
+          id?: string
+          phone?: string
+          result?: string
+          status?: string
+          street?: string
+        }
+        Update: {
+          apartment?: string
+          applicant?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          entrance?: string
+          floor?: string
+          house?: string
+          id?: string
+          phone?: string
+          result?: string
+          status?: string
+          street?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
