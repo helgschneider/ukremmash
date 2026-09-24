@@ -32,7 +32,7 @@ export function verifyToken(token: string): ServerRole {
   if (parts.length !== 3) throw new Error("Unauthorized");
   const [role, exp, sig] = parts;
   const expected = sign(`${role}.${exp}`);
-  const a = Buffer.from(sig);
+  const a = Buffer.from(sig ?? "");
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("Unauthorized");
   if (Number(exp) < Date.now()) throw new Error("Unauthorized");

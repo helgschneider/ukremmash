@@ -103,12 +103,10 @@ export const updateRequest = createServerFn({ method: "POST" })
     const { data: existing } = await sb.from("repair_requests").select("created_by").eq("id", data.id).single();
     if (!existing) throw new Error("Not found");
     if (role !== "admin" && existing.created_by !== role) throw new Error("Forbidden");
-    const patch: Record<string, unknown> = { ...data.fields };
-    if (role === "admin") {
-      patch.status = data.status;
-      patch.completed_at = data.completedAt;
-      patch.result = data.result;
-    }
+    const patch =
+      role === "admin"
+        ? { ...data.fields, status: data.status, completed_at: data.completedAt, result: data.result }
+        : { ...data.fields };
     const { data: row, error } = await sb.from("repair_requests").update(patch).eq("id", data.id).select("*").single();
     if (error) throw new Error(error.message);
     return toRequest(row as Row);
