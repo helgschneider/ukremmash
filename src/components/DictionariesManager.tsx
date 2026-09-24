@@ -40,16 +40,16 @@ function DictCard({ dictKey, dict, onChange }: { dictKey: DictKey; dict: Diction
   const add = () => {
     const v = draft.trim().slice(0, 100);
     if (!v) return;
-    if (dict.values.includes(v)) return toast.error("Такое значение уже есть");
+    if (dict.values.includes(v)) { toast.error("Такое значение уже есть"); return; }
     onChange({ ...dict, values: [...dict.values, v] });
     setDraft("");
   };
 
   const saveEdit = (i: number) => {
     const v = editVal.trim().slice(0, 100);
-    if (!v) return toast.error("Значение не может быть пустым");
+    if (!v) { toast.error("Значение не может быть пустым"); return; }
     const old = dict.values[i];
-    if (v !== old && dict.values.includes(v)) return toast.error("Такое значение уже есть");
+    if (v !== old && dict.values.includes(v)) { toast.error("Такое значение уже есть"); return; }
     const values = dict.values.map((x, j) => (j === i ? v : x));
     onChange({ values, defaultValue: dict.defaultValue === old ? v : dict.defaultValue });
     setEditIdx(null);
